@@ -141,10 +141,10 @@ namespace Gifter.Repositories
                                      p.UserProfileId,
 
                        up.Name, up.Bio, up.Email, up.DateCreated AS UserProfileDateCreated,
-                       up.ImageUrl AS UserProfileImageUrl, up.Id
+                       up.ImageUrl AS UserProfileImageUrl, up.Id AS PostUserProfileId
 
                             FROM Post p
-                             LEFT JOIN UserProfile  up ON p.UserProfileId= up.id 
+                             LEFT JOIN UserProfile  up ON p.UserProfileId= up.PostUserProfileId
                           WHERE p.id = @Id";
 
                     DbUtils.AddParameter(cmd, "@id", id);
