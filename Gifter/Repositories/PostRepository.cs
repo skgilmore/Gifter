@@ -137,15 +137,17 @@ namespace Gifter.Repositories
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                          SELECT p.Title, p.Caption, p.DateCreated, p.ImageUrl, p.id,
+                  SELECT p.Title, p.Caption, p.DateCreated, p.ImageUrl, p.id,
                                      p.UserProfileId,
 
                        up.Name, up.Bio, up.Email, up.DateCreated AS UserProfileDateCreated,
-                       up.ImageUrl AS UserProfileImageUrl, up.Id AS PostUserProfileId
+                       up.ImageUrl AS UserProfileImageUrl, up.Id AS PostUserProfileId,
+                       c.PostId, c.Message, c.Id as CommentId
 
                             FROM Post p
-                             LEFT JOIN UserProfile  up ON p.UserProfileId= up.PostUserProfileId
-                          WHERE p.id = @Id";
+                             LEFT JOIN UserProfile  up ON p.UserProfileId= up.id
+                             LEFT JOIN Comment c ON p.Id = c.PostId
+                          WHERE p.id = @id";
 
                     DbUtils.AddParameter(cmd, "@id", id);
 
@@ -170,9 +172,20 @@ namespace Gifter.Repositories
                                 DateCreated = DbUtils.GetDateTime(reader, "UserProfileDateCreated"),
                                 ImageUrl = DbUtils.GetString(reader, "UserProfileImageUrl"),
                             },
-                       
+                            Comments = new List<Comment>()
+
                         };
-                    
+
+                        if (DbUtils.IsNotDbNull(reader, "CommentId"))
+                        {
+                            post.Comments.Add(new Comment()
+                            {
+                              Id = DbUtils.GetInt(reader, "CommentId"),
+                                Message = DbUtils.GetString(reader, "Message"),
+                                // PostId = postId,
+                                //UserProfileId = DbUtils.GetInt(reader, "CommentUserProfileId")
+                            });
+                        }
                     }
 
                     reader.Close();

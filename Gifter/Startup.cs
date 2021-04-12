@@ -33,6 +33,7 @@ namespace Gifter
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Gifter", Version = "v1" });
             });
             services.AddTransient<IPostRepository, PostRepository>();
+            services.AddTransient<IUserProfileRepository, UserProfileRepository>();
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         // We update the original Conifigure to allow for a more open access line while in the Development stage of our app.
