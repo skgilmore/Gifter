@@ -259,7 +259,7 @@ namespace Gifter.Repositories
                 }
             }
         }
-        public List<Post> Search(string criterion, bool sortDescending)
+        public List<Post> Search(string criterion, string two, bool sortDescending)
         {
             using (var conn = Connection)
             {
@@ -274,7 +274,7 @@ namespace Gifter.Repositories
                         up.ImageUrl AS UserProfileImageUrl
                     FROM Post p 
                         LEFT JOIN UserProfile up ON p.UserProfileId = up.id
-                    WHERE p.Title LIKE @Criterion OR p.Caption LIKE @Criterion";
+                    WHERE p.Title LIKE @Criterion AND p.Caption LIKE @Two";
 
                     if (sortDescending)
                     {
@@ -287,6 +287,8 @@ namespace Gifter.Repositories
 
                     cmd.CommandText = sql;
                     DbUtils.AddParameter(cmd, "@Criterion", $"%{criterion}%");
+                    DbUtils.AddParameter(cmd, "@Two", $"%{two}%");
+
                     var reader = cmd.ExecuteReader();
 
                     var posts = new List<Post>();

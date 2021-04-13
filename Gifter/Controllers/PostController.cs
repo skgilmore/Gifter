@@ -65,5 +65,10 @@ namespace Gifter.Controllers
             _postRepository.Delete(id);
             return NoContent();
         }
+        [HttpGet("search")]
+        public IActionResult Search(string q, string r, bool sortDesc)
+        {
+            return Ok(_postRepository.Search(q, r, sortDesc));
+        }
     }
 }
