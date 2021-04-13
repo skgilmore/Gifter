@@ -27,7 +27,7 @@ namespace Gifter.Repositories
 
                             FROM UserProfile up
                              LEFT JOIN Post  p ON up.id = p.UserProfileId
-                          WHERE p.id = @id";
+                          WHERE up.id = @id";
                             // LEFT JOIN Comment c ON p.Id = c.PostId
                        //c.PostId, c.Message, c.Id as CommentId
 

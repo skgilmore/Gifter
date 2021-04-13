@@ -20,7 +20,7 @@ namespace Gifter.Controllers
                 _userProfileRepository = userProfileRepository;
             }
 
-            [HttpGet("{id}")]
+        [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
             var user = _userProfileRepository.GetById(id);
