@@ -19,5 +19,6 @@ namespace Gifter.Models
         [Required]
         public DateTime DateCreated { get; set; }
         public Post Post { get; set; }
+        public string FirebaseUserId { get; set; }
     }
 }

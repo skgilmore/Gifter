@@ -6,11 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Gifter.Controllers
 {
-        // GET: UserProfileController
-        [Route("api/[controller]")]
+    // GET: UserProfileController
+    [Authorize]
+    [Route("api/[controller]")]
         [ApiController]
     public class UserProfileController : ControllerBase
     {
@@ -20,15 +22,15 @@ namespace Gifter.Controllers
                 _userProfileRepository = userProfileRepository;
             }
 
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        [HttpGet("{firebaseUserId}")]
+        public IActionResult GetByFirebaseUserId(string firebaseUserId)
         {
-            var user = _userProfileRepository.GetById(id);
-            if (user == null)
+            var userProfile = _userProfileRepository.GetByFirebaseUserId(firebaseUserId);
+            if (userProfile == null)
             {
                 return NotFound();
             }
-            return Ok(user);
+            return Ok(userProfile);
         }
         public ActionResult Index()
         {
@@ -50,11 +52,14 @@ namespace Gifter.Controllers
         // POST: UserProfileController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(UserProfile userProfile)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                DateTime dt = DateTime.Now;
+                userProfile.DateCreated = dt;
+                _userProfileRepository.Add(userProfile);
+                return CreatedAtAction("Get", new { id = userProfile.Id }, userProfile);
             }
             catch
             {

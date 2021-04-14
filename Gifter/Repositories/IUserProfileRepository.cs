@@ -4,6 +4,8 @@ namespace Gifter.Repositories
 {
     public interface IUserProfileRepository
     {
-        UserProfile GetById(int id);
+        void Add(UserProfile userProfile);
+        UserProfile GetByFirebaseUserId(string firebaseUserId);
+      //  UserProfile GetById(int id);
     }
 }

@@ -11,7 +11,8 @@ namespace Gifter.Repositories
     public class UserProfileRepository : BaseRepository, IUserProfileRepository
     {
         public UserProfileRepository(IConfiguration configuration) : base(configuration) { }
-    public UserProfile GetById(int id)
+   
+        public UserProfile GetByFirebaseUserId(string firebaseUserId)
         {
             using (var conn = Connection)
             {
@@ -19,65 +20,69 @@ namespace Gifter.Repositories
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                  SELECT p.Title, p.Caption, p.DateCreated, p.ImageUrl, p.id,
-                                     p.UserProfileId,
+                        SELECT up.Id, Up.FirebaseUserId, up.Name AS UserProfileName, up.Email, 
+                               up.DateCreated, up.ImageUrl
 
-                       up.Name, up.Bio, up.Email, up.DateCreated AS UserProfileDateCreated,
-                       up.ImageUrl AS UserProfileImageUrl, up.Id AS PostUserProfileId
 
-                            FROM UserProfile up
-                             LEFT JOIN Post  p ON up.id = p.UserProfileId
-                          WHERE up.id = @id";
-                            // LEFT JOIN Comment c ON p.Id = c.PostId
-                       //c.PostId, c.Message, c.Id as CommentId
+                          FROM UserProfile up
+                         WHERE FirebaseUserId = @FirebaseuserId";
+                              //  p.Title, p.Caption, p.DateCreated, p.ImageUrl, p.id,
+                                //     p.UserProfileId 
+                         //LEFT JOIN Post  p ON up.id = p.UserProfileId
 
-                    DbUtils.AddParameter(cmd, "@id", id);
+                    DbUtils.AddParameter(cmd, "@FirebaseUserId", firebaseUserId);
+
+                    UserProfile userProfile = null;
 
                     var reader = cmd.ExecuteReader();
-
-                    UserProfile user= null;
                     if (reader.Read())
                     {
-                        user = new UserProfile()
+                        userProfile = new UserProfile()
                         {
-                            Id = id,
-                            Name = DbUtils.GetString(reader, "Name"),
+                            Id = DbUtils.GetInt(reader, "Id"),
+                            FirebaseUserId = DbUtils.GetString(reader, "FirebaseUserId"),
+                            Name = DbUtils.GetString(reader, "UserProfileName"),
                             Email = DbUtils.GetString(reader, "Email"),
-                            DateCreated = DbUtils.GetDateTime(reader, "UserProfileDateCreated"),
-                            ImageUrl = DbUtils.GetString(reader, "UserProfileImageUrl"),
-                            Post = new Post()
-                            {
-                                Id = DbUtils.GetInt(reader, "PostUserProfileId"),
-                                Title = DbUtils.GetString(reader, "Title"),
-                                Caption = DbUtils.GetString(reader, "Caption"),
-                                DateCreated = DbUtils.GetDateTime(reader, "DateCreated"),
-                                ImageUrl = DbUtils.GetString(reader, "ImageUrl"),
-                                UserProfileId = DbUtils.GetInt(reader, "UserProfileId"),
-                            },
+                            DateCreated = DbUtils.GetDateTime(reader, "DateCreated"),
+                        //    Post = new Post()
+                          //  {
+                            //    Id = DbUtils.GetInt(reader, "PostUserProfileId"),
+                              //  Title = DbUtils.GetString(reader, "Title"),
+                                //Caption = DbUtils.GetString(reader, "Caption"),
+                             //   DateCreated = DbUtils.GetDateTime(reader, "DateCreated"),
+                              //  ImageUrl = DbUtils.GetString(reader, "ImageUrl"),
+                              //  UserProfileId = DbUtils.GetInt(reader, "UserProfileId"),
+                            //},
                         };
-                            /*//  Comments = new List<Comment>()
-
-                          };
-
-                          if (DbUtils.IsNotDbNull(reader, "CommentId"))
-                          {
-                              post.Comments.Add(new Comment()
-                              {
-                                  Id = DbUtils.GetInt(reader, "CommentId"),
-                                  Message = DbUtils.GetString(reader, "Message"),
-                                  // PostId = postId,
-                                  //UserProfileId = DbUtils.GetInt(reader, "CommentUserProfileId")
-                              });
-                          } */
-                        }
-                    
-
+                    }
                     reader.Close();
 
-                    return user;
+                    return userProfile;
+                }
+            }
+        }
+        public void Add(UserProfile userProfile)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"INSERT INTO UserProfile (FirebaseUserId, Name, Email,@)
+                                        OUTPUT INSERTED.ID
+                                        VALUES (@FirebaseUserId, @Name, @Email)";
+                    DbUtils.AddParameter(cmd, "@FirebaseUserId", userProfile.FirebaseUserId);
+                    DbUtils.AddParameter(cmd, "@Name", userProfile.Name);
+                    DbUtils.AddParameter(cmd, "@Email", userProfile.Email);
+                   
+
+
+                    userProfile.Id = (int)cmd.ExecuteScalar();
                 }
             }
         }
 
     }
+
+                  
 }

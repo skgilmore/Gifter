@@ -19,9 +19,18 @@ export const PostProvider = (props) => {
             body: JSON.stringify(post)
         }).then(getAllPosts)
     };
+    const Search = (post) => {
+        return fetch("/api/post", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(post)
+        }).then(getAllPosts)
+    };
 
     return (
-        <PostContext.Provider value={{ posts, getAllPosts, addPost }}>
+        <PostContext.Provider value={{ posts, getAllPosts, addPost, Search }}>
             {props.children}
         </PostContext.Provider>
     );
